@@ -1,0 +1,274 @@
+<?php
+session_start();
+error_reporting(0);
+include('includes/config.php');
+if(strlen($_SESSION['alogin'])==0)
+	{	
+		$redirectPage = 'http://localhost/FinalYear/farmrent/index.php';
+
+		header("location: $redirectPage"); 
+}
+else{
+if(isset($_REQUEST['eid']))
+	{
+$eid=intval($_GET['eid']);
+$status="2";
+$sql = "UPDATE tblrent SET Status=:status WHERE  id=:eid";
+$query = $dbh->prepare($sql);
+$query -> bindParam(':status',$status, PDO::PARAM_STR);
+$query-> bindParam(':eid',$eid, PDO::PARAM_STR);
+$query -> execute();
+  echo "<script>alert('Booking Successfully Cancelled');</script>";
+echo "<script type='text/javascript'> document.location = 'canceled-bookings.php; </script>";
+}
+
+
+if(isset($_REQUEST['aeid']))
+	{
+$aeid=intval($_GET['aeid']);
+$status=1;
+
+$sql = "UPDATE tblrent SET Status=:status WHERE  id=:aeid";
+$query = $dbh->prepare($sql);
+$query -> bindParam(':status',$status, PDO::PARAM_STR);
+$query-> bindParam(':aeid',$aeid, PDO::PARAM_STR);
+$query -> execute();
+echo "<script>alert('Booking Successfully Confirmed');</script>";
+echo "<script type='text/javascript'> document.location = 'confirmed-bookings.php'; </script>";
+}
+
+
+ ?>
+
+<!doctype html>
+<html lang="en" class="no-js">
+
+<head>
+	<meta charset="UTF-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1">
+	<meta name="description" content="">
+	<meta name="author" content="">
+	<meta name="theme-color" content="#3e454c">
+	
+	<title>Farm Equipment Hire & Rental Hub | New Bookings   </title>
+
+	<!-- Font awesome -->
+	<link rel="stylesheet" href="css/font-awesome.min.css">
+	<!-- Sandstone Bootstrap CSS -->
+	<link rel="stylesheet" href="css/bootstrap.min.css">
+	<!-- Bootstrap Datatables -->
+	<link rel="stylesheet" href="css/dataTables.bootstrap.min.css">
+	<!-- Bootstrap social button library -->
+	<link rel="stylesheet" href="css/bootstrap-social.css">
+	<!-- Bootstrap select -->
+	<link rel="stylesheet" href="css/bootstrap-select.css">
+	<!-- Bootstrap file input -->
+	<link rel="stylesheet" href="css/fileinput.min.css">
+	<!-- Awesome Bootstrap checkbox -->
+	<link rel="stylesheet" href="css/awesome-bootstrap-checkbox.css">
+	<!-- Admin Stye -->
+	<link rel="stylesheet" href="css/style.css">
+  <style>
+		.errorWrap {
+    padding: 10px;
+    margin: 0 0 20px 0;
+    background: #fff;
+    border-left: 4px solid #dd3d36;
+    -webkit-box-shadow: 0 1px 1px 0 rgba(0,0,0,.1);
+    box-shadow: 0 1px 1px 0 rgba(0,0,0,.1);
+}
+.succWrap{
+    padding: 10px;
+    margin: 0 0 20px 0;
+    background: #fff;
+    border-left: 4px solid #5cb85c;
+    -webkit-box-shadow: 0 1px 1px 0 rgba(0,0,0,.1);
+    box-shadow: 0 1px 1px 0 rgba(0,0,0,.1);
+}
+		</style>
+
+</head>
+
+<body>
+	<?php include('includes/header.php');?>
+
+	<div class="ts-main-content">
+
+		<?php
+		$id = isset($_GET['id']) ? $_GET['id'] : null;
+		include('includes/leftbar.php');?>
+		<div class="content-wrapper">
+			<div class="container-fluid">
+
+				<div class="row">
+					<div class="col-md-12">
+
+						<h2 class="page-title">Booking Details</h2>
+
+						<!-- Zero Configuration Table -->
+						<div class="panel panel-default">
+							<div class="panel-heading">Bookings Info</div>
+							<div class="panel-body">
+
+
+<div id="print">
+								<table border="1"  class="display table table-striped table-bordered table-hover" cellspacing="0" width="100%"  >
+				
+									<tbody>
+
+									<?php 
+									$id = isset($_GET['id']) ? $_GET['id'] : null;
+									$bid=intval($_GET['bid']);
+									$sql = "SELECT tblusers.*,tblcategory.CategoryName,tblequipment.EqipmentTitle,tblrent.FromDate,tblrent.ToDate,tblrent.message,tblrent.equipmentId as vid,tblrent.Status,tblrent.PostingDate,tblrent.id,tblrent.BookingNumber, DATEDIFF(tblrent.ToDate,tblrent.FromDate) as totalnodays,tblequipment.PricePerDay, tblowner.Name AS owner_name, tblowner.mob AS owner_mob, tblowner.address AS owner_add, AVG(rating.rating) AS average_rating from tblrent join tblequipment on tblequipment.id=tblrent.equipmentId join tblusers on tblusers.EmailId=tblrent.userEmail join tblcategory on tblequipment.EquipmentCategory=tblcategory.id JOIN tblowner ON tblowner.id = tblequipment.ownerid LEFT JOIN rating ON rating.eq_id = tblequipment.id where tblrent.id=:bid";
+$query = $dbh -> prepare($sql);
+$query -> bindParam(':bid',$bid, PDO::PARAM_STR);
+$query->execute();
+$results=$query->fetchAll(PDO::FETCH_OBJ);
+$cnt=1;
+if($query->rowCount() > 0)
+{
+foreach($results as $result)
+{				?>	
+	<h3 style="text-align:center; color:red">#<?php echo htmlentities($result->BookingNumber);?> Booking Details </h3>
+
+		<tr>
+											<th colspan="4" style="text-align:center;color:blue">Farmer Details</th>
+										</tr>
+										<tr>
+											<th>Booking No.</th>
+											<td>#<?php echo htmlentities($result->BookingNumber);?></td>
+											<th>Name</th>
+											<td><?php echo htmlentities($result->FullName);?></td>
+										</tr>
+										<tr>											
+											<th>Email Id</th>
+											<td><?php echo htmlentities($result->EmailId);?></td>
+											<th>Contact No</th>
+											<td><?php echo htmlentities($result->ContactNo);?></td>
+										</tr>
+											<tr>											
+											<th>Address</th>
+											<td><?php echo htmlentities($result->Address);?></td>
+											<th>Village</th>
+											<td><?php echo htmlentities($result->City);?></td>
+										</tr>
+											<tr>											
+											<th>Taluka</th>
+											<td colspan="3"><?php echo htmlentities($result->Country);?></td>
+										</tr>
+
+										<tr>
+											<th colspan="4" style="text-align:center;color:blue">Owner Details</th>
+										</tr>
+											<tr>											
+												<th>Owner Name</th>
+													<td><?php echo htmlentities($result->owner_name);?></td>
+												
+												<th>Owner Address</th>
+													<td><?php echo htmlentities($result->owner_add);?></td>
+												
+											</tr>
+										<tr>
+											<th>Owner Phone No.</th>
+												<td><?php echo htmlentities($result->owner_mob);?></td>
+									
+										</tr>
+
+										<tr>
+											<th colspan="4" style="text-align:center;color:blue">Booking Details</th>
+										</tr>
+											<tr>											
+											<th>Equipment Name</th>
+											<td><?php echo htmlentities($result->vid);?><?php echo htmlentities($result->CategoryName);?> , <?php echo htmlentities($result->EqipmentTitle);?></td>
+											<th>Booking Date</th>
+											<td><?php echo htmlentities(date("d-m-Y", strtotime($result->PostingDate)));?></td>
+										</tr>
+										<tr>
+											<th>From Date</th>
+											<td><?php echo htmlentities(date("d-m-Y", strtotime($result->FromDate)));?></td>
+											<th>To Date</th>
+											<td><?php echo htmlentities(date("d-m-Y", strtotime($result->ToDate)));?></td>
+										</tr>
+<tr>
+	<th>Total Days</th>
+	<td><?php echo htmlentities($tdays=$result->totalnodays);?></td>
+	<th>Rent Per Days</th>
+	<td><?php echo htmlentities($ppdays=$result->PricePerDay);?></td>
+</tr>
+<tr>
+	<th colspan="3" style="text-align:center">Grand Total</th>
+	<td><?php echo htmlentities($tdays*$ppdays);?></td>
+</tr>
+<tr>
+<th>Booking Status</th>
+<td><?php 
+if($result->Status==0)
+{
+echo '<span style="color: orange;">' . htmlentities('Not Confirmed yet') . '</span>';
+} else if ($result->Status==1) {
+	echo '<span style="color: green;">' . htmlentities('Confirmed') . '</span>';
+}
+ else{
+	echo '<span style="color: red;">' . htmlentities('Cancelled') . '</span>';
+ }
+ $averageRating = $result->average_rating;
+        // Check if the average rating is null and set it to 0 if null
+    $averageRating = $averageRating ? $averageRating : 0;
+
+										?></td>
+										<th>Equipment Avg Rating</th> 
+										<td><?php echo number_format($averageRating, 1); ?> <i class="glyphicon glyphicon-star-empty" aria-hidden="true"></i></td>
+									</tr>
+									
+									
+									<?php if($result->Status==0){ ?>
+										<tr>	
+										<td style="text-align:center" colspan="4">
+				<a href="confirmed-bookings.php?aeid=<?php echo htmlentities($result->id);?>&id=<?php echo htmlentities($id);?>" onclick="return confirm('Do you really want to Confirm this booking')" class="btn btn-primary"> Accept Booking</a> 
+
+<a href="canceled-bookings.php?eid=<?php echo htmlentities($result->id);?>&id=<?php echo htmlentities($id);?>" onclick="return confirm('Do you really want to Cancel this Booking')" class="btn btn-danger"> Reject Booking</a>
+</td>
+</tr>
+
+										
+<?php } ?>
+										<?php $cnt=$cnt+1; }} ?>
+										
+									</tbody>
+								</table>
+								<form method="post">
+	   <input name="Submit2" type="submit" class="txtbox4" value="Print" onClick="return f3();" style="cursor: pointer;"  />
+	</form>
+
+							</div>
+						</div>
+
+					
+
+					</div>
+				</div>
+
+			</div>
+		</div>
+	</div>
+
+	<!-- Loading Scripts -->
+	<script src="js/jquery.min.js"></script>
+	<script src="js/bootstrap-select.min.js"></script>
+	<script src="js/bootstrap.min.js"></script>
+	<script src="js/jquery.dataTables.min.js"></script>
+	<script src="js/dataTables.bootstrap.min.js"></script>
+	<script src="js/Chart.min.js"></script>
+	<script src="js/fileinput.js"></script>
+	<script src="js/chartData.js"></script>
+	<script src="js/main.js"></script>
+	<script language="javascript" type="text/javascript">
+function f3()
+{
+window.print(); 
+}
+</script>
+</body>
+</html>
+<?php } ?>
