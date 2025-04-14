@@ -1,7 +1,7 @@
-###Farm Equipment Rental Hub:
+## Farm Equipment Rental Hub:
 
 
-#👨‍💻 Developer Information:
+# 👨‍💻 Developer Information:
 
 - **Developed by**: Vaibhav Patil
 - **Contact**: vaibhavbpatil1210@gmail.com
